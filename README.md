@@ -20,3 +20,4 @@
 - https://wiki.archlinux.org/index.php
 - https://www.reddit.com/r/unixporn
 - https://tutos.readthedocs.io/en/latest/source/Arch.html
+- https://www.youtube.com/watch?v=Api6dFMlxAA
