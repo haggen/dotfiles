@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Minimal Installation Instruction for Archlinux
+# Minimal installation steps for Archlinux.
 # Few prompts. Lots of assumptions. Only tested on virtual machines.
 #
 
@@ -8,7 +8,8 @@ set -ue
 
 # Set keyboard layout.
 ls /usr/share/kbd/keymaps/**/*.map.gz
-read -p "Pick a keyboard layout: (e.g. br-abnt2)\n>" layout
+echo "Pick a keyboard layout: (e.g. br-abnt2)"
+read -p ">" layout
 loadkeys $layout
 
 # Check internet connection.
@@ -19,19 +20,22 @@ ping -c5 archlinux.org || { echo "Something's up with your connection." >&2; exi
 timedatectl set-ntp true
 
 # Prepare disk.
-cfdisk
+lsblk
+echo "What disk will be used to install Archlinux? (e.g. /dev/sda)" 
+read -p ">" disk
+fdisk $disk
 
-# Ask for partitions and format.
-read -p "Type the partition name where EFI will be installed: (e.g. /dev/sda1)\n>" efi
-mkfs.fat -F32 $efi
-read -p "Type the partition name where Archlinux will be installed: (e.g. /dev/sda2)\n>" root
+# Ask for install partition and format it.
+echo "What partition will be used to install Archlinux? (e.g. /dev/sda2)"
+read -p ">" root
 mkfx.ext4 $root
 
-# Enlist closest mirror.
+# Enlist closest mirror. 
+# TODO: add extra mirrors.
 echo 'Server = https://pet.inf.ufsc.br/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 
-# Enable multilib repository.
-sed -zi "s/#\[multilib\]\n#/[multilib]\n/" /etc/pacman.conf
+# Enable multilib repository for 32bit applications.
+#sed -zi "s/#\[multilib\]\n#/[multilib]\n/" /etc/pacman.conf
 
 # Just do it! (install the system)
 mount $root /mnt
@@ -45,10 +49,20 @@ nano /mnt/etc/fstab
 arch-chroot /mnt
 
 # Setup GRUB.
-pacman -S grub efibootmgr
-mkdir /boot/EFI
-mount $efi /boot/EFI
-grub-install --target=x86_64-efi --bootloader-id=GRUB --recheck
+pacman -S grub 
+if test -d /sys/firmware/efi; then
+	echo "What partition will used to setup EFI? (e.g. /dev/sda1)"
+	read -p ">" efi
+	mkfs.fat -F32 $efi
+	pacman -S efibootmgr
+	mkdir /boot/EFI
+	mount $efi /boot/EFI
+	grub-install --target=x86_64-efi --bootloader-id=GRUB --recheck
+else
+	echo "What disk will be used to install GRUB? (e.g. /dev/sda)"
+	read -p ">" grub
+	grub-install --target=i386-pc $grub
+fi
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # Set hostname and locale.
@@ -63,7 +77,8 @@ echo "LANG=$LANG" > /etc/locale.conf
 
 # Pick a timezone.
 ls /usr/share/zoneinfo/
-read -p "Type the timezone file to use: (e.g. Brazil/East)\n>" timezone
+echo "What timezone you're in? (e.g. Brazil/East)"
+read -p ">" timezone
 ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 
 # Set hardware clock.
@@ -75,7 +90,8 @@ cat <<-EOF > /etc/vconsole.conf
 EOF
 
 # Setup accounts.
-read -p "Type your username: (e.g. arthur)\n>" username
+echo "Enter your username: (e.g. arthur)"
+read -p ">" username
 useradd -mg users -G wheel,storage,power -s /bin/bash $username
 passwd $username
 
@@ -90,10 +106,10 @@ cd /tmp/yay-bin
 makepkg -sri
 
 # Setup X and i3.
-pacman -S xorg xorg-xinit xrvt-unicode uxrvt-perls i3 i3blocks i3lock
-cat <<-EOF >> /etc/profile
-	test "$(tty)" = "/dev/tty1" && startx
-EOF
+#pacman -S xorg xorg-xinit xrvt-unicode uxrvt-perls i3 i3blocks i3lock
+#cat <<-EOF >> /etc/profile
+#	test "$(tty)" = "/dev/tty1" && startx
+#EOF
 
 # Done.
 exit
