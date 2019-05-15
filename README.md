@@ -12,6 +12,7 @@
 - [ ] Fix keyboard layout on X11.
 - [ ] Finish i3blocks config.
 - [ ] Add missing software to installation script.
+- [ ] Setup zsh with [prezto](https://github.com/sorin-ionescu/prezto) and [spaceship](https://github.com/denysdovhan/spaceship-prompt).
 
 ## Reference
 
