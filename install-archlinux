@@ -6,30 +6,73 @@
 
 set -ue
 
-if test "$1" = "--chrooted"; then
+keyboard_layout=br-abnt2
+timezone=Brazil/East
+disk=/dev/sda
+os_partition=/dev/sda2
+efi_partition=/dev/sda1
+net_interface=enp0s3
+username=arthur
+rooted=
+
+while test $# -gt 0; do
+	case "$1" in 
+		-k|--keyboard-layout)
+			keyboard_layout="$2"
+			shift
+			;;
+		-d|--disk)
+			disk="$2"
+			shift
+			;;
+		-p|--os-partition)
+			os_partition="$2"
+			shift
+			;;
+		-e|--efi-partition)
+			efi_partition="$2"
+			shift
+			;;
+		-n|--net-interface)
+			net_interface="$2"
+			shift
+			;;
+		-u|--username)
+			username="$2"
+			shift
+			;;
+		-t|--timezone)
+			timezone="$2"
+			shift
+			;;
+		-r|--rooted)
+			rooted="rooted"
+			;;
+	esac
+	shift
+done
+
+echo $keyboard_layout $rooted
+
+exit
+
+if test -n "$rooted"; then
 	# Update everything.
 	pacman -Syyu
 
 	# Ask DHCP on boot.
-	ip addr
-	echo "What network interface you're using to connect to the internet?"
-	read -p ">" interface
-	systemctl enable dhcpcd@$interface.service
+	systemctl enable dhcpcd@$net_interface.service
 
 	# Setup GRUB.
 	pacman -S grub 
 	if test -d /sys/firmware/efi; then
-		echo "What partition will used to setup EFI? (e.g. /dev/sda1)"
-		read -p ">" efi
-		mkfs.fat -F32 $efi
+		mkfs.fat -F32 $efi_partition
 		pacman -S efibootmgr
 		mkdir /boot/EFI
-		mount $efi /boot/EFI
+		mount $efi_partition /boot/EFI
 		grub-install --target=x86_64-efi --bootloader-id=GRUB --recheck
 	else
-		echo "What disk will be used to install GRUB? (e.g. /dev/sda)"
-		read -p ">" grub
-		grub-install --target=i386-pc $grub
+		grub-install --target=i386-pc $disk
 	fi
 	grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -45,9 +88,7 @@ if test "$1" = "--chrooted"; then
 
 	# Pick a timezone.
 	ls /usr/share/zoneinfo/
-	#echo "What timezone you're in? (e.g. Brazil/East)"
-	#read -p ">" timezone
-	ln -sf /usr/share/zoneinfo/Brazil/East /etc/localtime
+	ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
 
 	# Set hardware clock.
 	hwclock --systohc --utc
@@ -58,10 +99,8 @@ if test "$1" = "--chrooted"; then
 	EOF
 
 	# Setup accounts.
-	#echo "Enter your username: (e.g. arthur)"
-	#read -p ">" username
-	useradd -mg users -G wheel,storage,power -s /bin/bash arthur
-	passwd arthur
+	useradd -mg users -G wheel,storage,power -s /bin/bash $username
+	passwd $username
 
 	# Setup sudo and confirm.
 	pacman -S sudo
@@ -85,27 +124,19 @@ fi
 
 # Set keyboard layout.
 ls /usr/share/kbd/keymaps/**/*.map.gz
-echo "Pick a keyboard layout: (e.g. br-abnt2)"
-read -p ">" layout
-loadkeys $layout
+loadkeys $keyboard_layout
 
 # Check internet connection.
-ip link
-ping -c5 archlinux.org || { echo "Something's up with your connection." >&2; exit 1; }
+ping -c3 archlinux.org || { echo "Something's up with your connection." >&2; exit 1; }
 
 # Sync time.
 timedatectl set-ntp true
 
 # Prepare disk.
-lsblk
-echo "What disk will be used to install Archlinux? (e.g. /dev/sda)" 
-read -p ">" disk
 fdisk $disk
 
 # Ask for install partition and format it.
-echo "What partition will be used to install Archlinux? (e.g. /dev/sda2)"
-read -p ">" root
-mkfs.ext4 $root
+mkfs.ext4 $os_partition
 
 # Enlist closest mirror. 
 # TODO: add extra mirrors.
@@ -125,7 +156,7 @@ EOF
 #sed -zi "s/#\[multilib\]\n#/[multilib]\n/" /etc/pacman.conf
 
 # Just do it! (install the system)
-mount $root /mnt
+mount $os_partition /mnt
 pacstrap /mnt base base-devel
 
 # Generate fstab and confirm.
@@ -133,17 +164,9 @@ genfstab -U -p /mnt >> /mnt/etc/fstab
 nano /mnt/etc/fstab
 
 # Change root.
-arch-chroot /mnt "$0 --chrooted"
+cp $0 /mnt/root/
+arch-chroot /mnt /root/$(basename $0) --chrooted
 
 # Done
 umount -a
 echo -e "Done! Type 'telinit 6' to reboot.\n"
-
-# Troubleshooting:
-#
-# 1. Authentication token manipulation error trying to login?
-# A: Use root or live boot to change password and try again.
-#
-# 2. No internet connection?
-# A: Check device status and name with `ip addr` then run `sudo dhcpd en0` where `en0` is the name of your link.
-#
