@@ -28,11 +28,21 @@ fdisk $disk
 # Ask for install partition and format it.
 echo "What partition will be used to install Archlinux? (e.g. /dev/sda2)"
 read -p ">" root
-mkfx.ext4 $root
+mkfs.ext4 $root
 
 # Enlist closest mirror. 
 # TODO: add extra mirrors.
-echo 'Server = https://pet.inf.ufsc.br/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+cat <<-EOF > /etc/pacman.d/mirrorlist
+	Server = http://br.mirror.archlinux-br.org/$repo/os/$arch
+	Server = http://archlinux.c3sl.ufpr.br/$repo/os/$arch
+	Server = http://www.caco.ic.unicamp.br/archlinux/$repo/os/$arch
+	Server = https://www.caco.ic.unicamp.br/archlinux/$repo/os/$arch
+	Server = http://linorg.usp.br/archlinux/$repo/os/$arch
+	Server = http://pet.inf.ufsc.br/mirrors/archlinux/$repo/os/$arch
+	Server = http://archlinux.pop-es.rnp.br/$repo/os/$arch
+	Server = http://mirror.ufam.edu.br/archlinux/$repo/os/$arch
+	Server = http://mirror.ufscar.br/archlinux/$repo/os/$arch
+EOF
 
 # Enable multilib repository for 32bit applications.
 #sed -zi "s/#\[multilib\]\n#/[multilib]\n/" /etc/pacman.conf
