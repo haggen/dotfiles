@@ -1,0 +1,189 @@
+# i3 config file (v4)
+#
+# Please see https://i3wm.org/docs/userguide.html for a complete reference!
+
+set $meta Mod4
+set $alt Mod1
+
+# Set modifier key.
+set $mod $meta
+
+# Before i3 v4.8, we used to recommend this one as the default:
+# font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
+# The font above is very space-efficient, that is, it looks good, sharp and
+# clear in small sizes. However, its unicode glyph coverage is limited, the old
+# X core fonts rendering does not support right-to-left and this being a bitmap
+# font, it doesn’t scale on retina/hidpi displays.
+
+# Use Mouse $mod+to drag floating windows to their wanted position.
+floating_modifier $mod
+
+# Start a terminal either horizontally (below) or vertically (to the right).
+bindsym $mod+Return split h, exec i3-sensible-terminal
+bindsym $mod+Shift+Return split v, exec i3-sensible-terminal
+
+# Kill focused window.
+bindsym $mod+Shift+q kill
+
+# Change focus.
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# Move focused window.
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# split in horizontal orientation
+bindsym $mod+h split h
+
+# split in vertical orientation
+bindsym $mod+v split v
+
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+
+# change container layout (stacked, tabbed, toggle split)
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# toggle tiling / floating
+bindsym $mod+Shift+space floating toggle
+
+# change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+# Define names for default workspaces for which we configure key bindings later on.
+# We use variables to avoid repeating the names in multiple places.
+set $workspace1 "1:Terminal"
+set $workspace2 "2:Browser"
+set $workspace3 "3:Misc"
+set $workspace4 "4"
+set $workspace5 "5"
+set $workspace6 "6"
+set $workspace7 "7"
+set $workspace8 "8"
+set $workspace9 "9"
+set $workspace10 "10"
+
+# switch to workspace
+bindsym $mod+1 workspace $workspace1
+bindsym $mod+2 workspace $workspace2
+bindsym $mod+3 workspace $workspace3
+bindsym $mod+4 workspace $workspace4
+bindsym $mod+5 workspace $workspace5
+bindsym $mod+6 workspace $workspace6
+bindsym $mod+7 workspace $workspace7
+bindsym $mod+8 workspace $workspace8
+bindsym $mod+9 workspace $workspace9
+bindsym $mod+0 workspace $workspace10
+
+# move focused container to workspace
+bindsym $mod+Shift+1 move container to workspace $workspace1
+bindsym $mod+Shift+2 move container to workspace $workspace2
+bindsym $mod+Shift+3 move container to workspace $workspace3
+bindsym $mod+Shift+4 move container to workspace $workspace4
+bindsym $mod+Shift+5 move container to workspace $workspace5
+bindsym $mod+Shift+6 move container to workspace $workspace6
+bindsym $mod+Shift+7 move container to workspace $workspace7
+bindsym $mod+Shift+8 move container to workspace $workspace8
+bindsym $mod+Shift+9 move container to workspace $workspace9
+bindsym $mod+Shift+0 move container to workspace $workspace10
+
+# reload the configuration file
+bindsym $mod+Shift+c reload
+
+# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+r restart
+
+# exit i3 (logs you out of your X session)
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+
+# Resize mode.
+set $resize "Resizing..."
+mode $resize {
+	bindsym Left+resize grow left 20 px
+	bindsym Down+resize grow down 20 px
+	bindsym Up+resize grow up 20 px
+	bindsym Right+resize grow right 20 px
+
+	bindsym Mod1 Left+resize shrink left 20 px
+	bindsym Mod1 Down+resize shrink down 20 px
+	bindsym Mod1 Up+resize shrink up 20 px
+	bindsym Mod1 Right+resize shrink right 20 px
+
+	bindsym Return mode "default"
+	bindsym Escape mode "default"
+	bindsym $mod+r mode "default"
+}
+bindsym $mod+r mode $resize
+
+# Appearance variables.
+set $font-size 12
+set $line-height 18
+set $font-family IBM Plex Mono
+
+set_from_resource $background background #000000
+set_from_resource $foreground foreground #ffffff
+set_from_resource $color0 color0 #000000
+set_from_resource $color1 color1 #000000
+set_from_resource $color2 color2 #000000
+set_from_resource $color3 color3 #000000
+set_from_resource $color4 color4 #000000
+set_from_resource $color5 color5 #000000
+set_from_resource $color6 color6 #000000
+set_from_resource $color7 color7 #000000
+set_from_resource $color8 color8 #000000
+set_from_resource $color9 color9 #000000
+set_from_resource $color10 color10 #000000
+set_from_resource $color11 color11 #000000
+set_from_resource $color12 color12 #000000
+set_from_resource $color13 color13 #000000
+set_from_resource $color14 color14 #000000
+set_from_resource $color15 color15 #000000
+
+# Font for window titles. Will also be used by the bar unless a different font is used in the bar {} block below.
+font xft:$font-family $line-height
+
+# Remover border leave the title.
+default_border normal 0
+
+# Emulate title bar padding by setting larger font then formatting the title with a smaller one.
+for_window [class=".*"] title_format <span font="$font-size"> %title</span>
+
+# Colors:               Bord.   Back.   Text    Indi.   Chil.
+client.focused          #0066ff #0066ff #ffffff #000000 #0066ff
+client.focused_inactive #222222 #222222 #ffffff #000000 #000000
+client.unfocused        #222222 #222222 #ffffff #000000 #000000
+client.urgent           #ff3300 #000000 #ffffff #000000 #000000
+client.placeholder      #000000 #000000 #000000 #000000 #000000
+client.background       #000000
+
+# Configure i3bar.
+bar {
+	# See ~/.config/i3blocks/config
+	status_command i3blocks 
+	font xft:$font-family $font-size
+	height 36
+
+	colors {
+		# Workspace btns.: Bord.   Back.   Text         
+		focused_workspace  #ffffff #ffffff #000000
+		inactive_workspace #222222 #222222 #ffffff
+		active_workspace   #222222 #222222 #ffffff
+		urgent_workspace   #222222 #222222 #ffffff
+		binding_mode       #222222 #222222 #ffffff
+
+		# Bar colors.
+		background         #222222
+		statusline         #ffffff
+		separator          #222222
+	}
+}

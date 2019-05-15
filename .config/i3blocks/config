@@ -1,0 +1,26 @@
+separator=false
+separator_symbol_width=10
+
+[volume]
+full_text=50%
+interval=once
+
+[cpu]
+full_text=0.2
+interval=1
+
+[ip]
+command=hostname -i
+interval=once
+
+[weather]
+command=curl -s https:/wttr.in/Sao+Paulo?format=1
+interval=once
+
+[date]
+command=date +"%b %d"
+interval=1
+
+[clock]
+command=date +"%R"
+interval=1

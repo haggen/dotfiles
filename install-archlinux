@@ -1,0 +1,110 @@
+#!/bin/sh
+#
+# Minimal Installation Instruction for Archlinux
+# Few prompts. Lots of assumptions. Only tested on virtual machines.
+#
+
+set -ue
+
+# Set keyboard layout.
+ls /usr/share/kbd/keymaps/**/*.map.gz
+read -p "Pick a keyboard layout: (e.g. br-abnt2)\n>" layout
+loadkeys $layout
+
+# Check internet connection.
+ip link
+ping -c5 archlinux.org || { echo "Something's up with your connection." >&2; exit 1; }
+
+# Sync time.
+timedatectl set-ntp true
+
+# Prepare disk.
+cfdisk
+
+# Ask for partitions and format.
+read -p "Type the partition name where EFI will be installed: (e.g. /dev/sda1)\n>" efi
+mkfs.fat -F32 $efi
+read -p "Type the partition name where Archlinux will be installed: (e.g. /dev/sda2)\n>" root
+mkfx.ext4 $root
+
+# Enlist closest mirror.
+echo 'Server = https://pet.inf.ufsc.br/archlinux/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+
+# Enable multilib repository.
+sed -zi "s/#\[multilib\]\n#/[multilib]\n/" /etc/pacman.conf
+
+# Just do it! (install the system)
+mount $root /mnt
+pacstrap /mnt base base-devel
+
+# Generate fstab and confirm.
+genfstab -U -p /mnt >> /mnt/etc/fstab
+nano /mnt/etc/fstab
+
+# Change root.
+arch-chroot /mnt
+
+# Setup GRUB.
+pacman -S grub efibootmgr
+mkdir /boot/EFI
+mount $efi /boot/EFI
+grub-install --target=x86_64-efi --bootloader-id=GRUB --recheck
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Set hostname and locale.
+echo "archlinux" > /etc/hostname
+cat <<-EOF > /etc/locale.gen
+	en_US.UTF-8 UTF-8
+	en_US ISO-8859-1
+EOF
+locale-gen
+export LANG=en_US.UTF-8
+echo "LANG=$LANG" > /etc/locale.conf
+
+# Pick a timezone.
+ls /usr/share/zoneinfo/
+read -p "Type the timezone file to use: (e.g. Brazil/East)\n>" timezone
+ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
+
+# Set hardware clock.
+hwclock --systohc --utc
+
+# Persist keyboard layout.
+cat <<-EOF > /etc/vconsole.conf
+    KEYMAP=$layout
+EOF
+
+# Setup accounts.
+read -p "Type your username: (e.g. arthur)\n>" username
+useradd -mg users -G wheel,storage,power -s /bin/bash $username
+passwd $username
+
+# Setup sudo and confirm.
+pacman -S sudo
+EDITOR=nano visudo
+
+# Setup AUR.
+pacman -S git
+git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+cd /tmp/yay-bin
+makepkg -sri
+
+# Setup X and i3.
+pacman -S xorg xorg-xinit xrvt-unicode uxrvt-perls i3 i3blocks i3lock
+cat <<-EOF >> /etc/profile
+	test "$(tty)" = "/dev/tty1" && startx
+EOF
+
+# Done.
+exit
+umount -a
+echo -e "Done! Type 'telinit 6' to reboot.\n"
+
+# Troubleshooting:
+#
+# 1. Authentication token manipulation error trying to login?
+# A: Use root or live boot to change password and try again.
+#
+# 2. No internet connection?
+# A: Check device status and name with `ip addr` then run `sudo dhcpd en0` where `en0` is the name of your link.
+#

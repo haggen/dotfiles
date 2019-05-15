@@ -1,0 +1,33 @@
+*font: xft:IBM Plex Mono:size=12
+*foreground: #b7b8b9
+*background: #0c0d0e
+*cursorColor: #b7b8b9
+*color0: #0c0d0e
+*color1: #e31a1c
+*color2: #31a354
+*color3: #dca060
+*color4: #3182bd
+*color5: #756bb1
+*color6: #80b1d3
+*color7: #b7b8b9
+*color8: #737475
+*color9: #e31a1c
+*color10: #31a354
+*color11: #dca060
+*color12: #3182bd
+*color13: #756bb1
+*color14: #80b1d3
+*color15: #fcfdfe
+
+URxvt.depth: 24
+URxvt.borderless: 1
+URxvt.scrollBar: false
+URxvt.saveLines: 9999
+URxvt.transparent: true
+URxvt.shading: 10
+URxvt.perl-ext: default,url-select,clipboard 
+URxvt.keysym.Shift-Control-C: perl:clipboard:copy 
+URxvt.keysym.Shift-Control-V: perl:clipboard:paste
+URxvt.iso14755: false 
+URxvt.iso14755_52: false 
+URxvt.internalBorder: 11
