@@ -1,4 +1,4 @@
-> My dotfiles plus scripts.
+![Rice](screenshot.png)
 
 ## About
 
@@ -7,6 +7,7 @@
 
 ## Roadmap
 
+- [ ] Write instructions.
 - [ ] Fix network not working on boot--use `sudo dhcpcd <device>` for now.
 - [ ] Fix keyboard layout on X11.
 - [ ] Finish i3blocks config.
