@@ -6,6 +6,83 @@
 
 set -ue
 
+if test "$1" = "--chrooted"; then
+	# Update everything.
+	pacman -Syyu
+
+	# Ask DHCP on boot.
+	ip addr
+	echo "What network interface you're using to connect to the internet?"
+	read -p ">" interface
+	systemctl enable dhcpcd@$interface.service
+
+	# Setup GRUB.
+	pacman -S grub 
+	if test -d /sys/firmware/efi; then
+		echo "What partition will used to setup EFI? (e.g. /dev/sda1)"
+		read -p ">" efi
+		mkfs.fat -F32 $efi
+		pacman -S efibootmgr
+		mkdir /boot/EFI
+		mount $efi /boot/EFI
+		grub-install --target=x86_64-efi --bootloader-id=GRUB --recheck
+	else
+		echo "What disk will be used to install GRUB? (e.g. /dev/sda)"
+		read -p ">" grub
+		grub-install --target=i386-pc $grub
+	fi
+	grub-mkconfig -o /boot/grub/grub.cfg
+
+	# Set hostname and locale.
+	echo "archlinux" > /etc/hostname
+	cat <<-EOF > /etc/locale.gen
+		en_US.UTF-8 UTF-8
+		en_US ISO-8859-1
+	EOF
+	locale-gen
+	export LANG=en_US.UTF-8
+	echo "LANG=$LANG" > /etc/locale.conf
+
+	# Pick a timezone.
+	ls /usr/share/zoneinfo/
+	#echo "What timezone you're in? (e.g. Brazil/East)"
+	#read -p ">" timezone
+	ln -sf /usr/share/zoneinfo/Brazil/East /etc/localtime
+
+	# Set hardware clock.
+	hwclock --systohc --utc
+
+	# Persist keyboard layout.
+	cat <<-EOF > /etc/vconsole.conf
+		KEYMAP=$layout
+	EOF
+
+	# Setup accounts.
+	#echo "Enter your username: (e.g. arthur)"
+	#read -p ">" username
+	useradd -mg users -G wheel,storage,power -s /bin/bash arthur
+	passwd arthur
+
+	# Setup sudo and confirm.
+	pacman -S sudo
+	EDITOR=nano visudo
+
+	# Setup AUR.
+	pacman -S git
+	git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+	cd /tmp/yay-bin
+	makepkg -sri
+
+	# Setup X and i3.
+	#pacman -S xorg xorg-xinit xrvt-unicode uxrvt-perls i3 i3blocks i3lock
+	#cat <<-EOF >> /etc/profile
+	#	test "$(tty)" = "/dev/tty1" && startx
+	#EOF
+
+	# Done.
+	exit
+fi
+
 # Set keyboard layout.
 ls /usr/share/kbd/keymaps/**/*.map.gz
 echo "Pick a keyboard layout: (e.g. br-abnt2)"
@@ -56,73 +133,9 @@ genfstab -U -p /mnt >> /mnt/etc/fstab
 nano /mnt/etc/fstab
 
 # Change root.
-arch-chroot /mnt
+arch-chroot /mnt "$0 --chrooted"
 
-# Setup GRUB.
-pacman -S grub 
-if test -d /sys/firmware/efi; then
-	echo "What partition will used to setup EFI? (e.g. /dev/sda1)"
-	read -p ">" efi
-	mkfs.fat -F32 $efi
-	pacman -S efibootmgr
-	mkdir /boot/EFI
-	mount $efi /boot/EFI
-	grub-install --target=x86_64-efi --bootloader-id=GRUB --recheck
-else
-	echo "What disk will be used to install GRUB? (e.g. /dev/sda)"
-	read -p ">" grub
-	grub-install --target=i386-pc $grub
-fi
-grub-mkconfig -o /boot/grub/grub.cfg
-
-# Set hostname and locale.
-echo "archlinux" > /etc/hostname
-cat <<-EOF > /etc/locale.gen
-	en_US.UTF-8 UTF-8
-	en_US ISO-8859-1
-EOF
-locale-gen
-export LANG=en_US.UTF-8
-echo "LANG=$LANG" > /etc/locale.conf
-
-# Pick a timezone.
-ls /usr/share/zoneinfo/
-echo "What timezone you're in? (e.g. Brazil/East)"
-read -p ">" timezone
-ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-
-# Set hardware clock.
-hwclock --systohc --utc
-
-# Persist keyboard layout.
-cat <<-EOF > /etc/vconsole.conf
-    KEYMAP=$layout
-EOF
-
-# Setup accounts.
-echo "Enter your username: (e.g. arthur)"
-read -p ">" username
-useradd -mg users -G wheel,storage,power -s /bin/bash $username
-passwd $username
-
-# Setup sudo and confirm.
-pacman -S sudo
-EDITOR=nano visudo
-
-# Setup AUR.
-pacman -S git
-git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
-cd /tmp/yay-bin
-makepkg -sri
-
-# Setup X and i3.
-#pacman -S xorg xorg-xinit xrvt-unicode uxrvt-perls i3 i3blocks i3lock
-#cat <<-EOF >> /etc/profile
-#	test "$(tty)" = "/dev/tty1" && startx
-#EOF
-
-# Done.
-exit
+# Done
 umount -a
 echo -e "Done! Type 'telinit 6' to reboot.\n"
 
