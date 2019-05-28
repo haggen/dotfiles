@@ -2,11 +2,8 @@
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
-set $meta Mod4
-set $alt Mod1
-
 # Set modifier key.
-set $mod $meta
+set $mod Mod4
 
 # Before i3 v4.8, we used to recommend this one as the default:
 # font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
@@ -62,15 +59,16 @@ bindsym $mod+a focus parent
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $workspace1 "1:Terminal"
-set $workspace2 "2:Browser"
-set $workspace3 "3:Misc"
-set $workspace4 "4"
-set $workspace5 "5"
-set $workspace6 "6"
-set $workspace7 "7"
-set $workspace8 "8"
-set $workspace9 "9"
+set $workspace1 <span font="SF Mono 12">    1    </span>
+set $workspace2 <span font="SF Mono 12">    2    </span>
+set $workspace3 <span font="SF Mono 12">    3    </span>
+set $workspace4 <span font="SF Mono 12">    4    </span>
+set $workspace5 <span font="SF Mono 12">    5    </span>
+set $workspace6 <span font="SF Mono 12">    6    </span>
+set $workspace7 <span font="SF Mono 12">    7    </span>
+set $workspace8 <span font="SF Mono 12">    8    </span>
+set $workspace9 <span font="SF Mono 12">    9    </span>
+
 set $workspace10 "10"
 
 # switch to workspace
@@ -109,15 +107,15 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 # Resize mode.
 set $resize "Resizing..."
 mode $resize {
-	bindsym Left+resize grow left 20 px
-	bindsym Down+resize grow down 20 px
-	bindsym Up+resize grow up 20 px
-	bindsym Right+resize grow right 20 px
+	bindsym Left resize grow left 20 px
+	bindsym Down resize grow down 20 px
+	bindsym Up resize grow up 20 px
+	bindsym Right resize grow right 20 px
 
-	bindsym Mod1 Left+resize shrink left 20 px
-	bindsym Mod1 Down+resize shrink down 20 px
-	bindsym Mod1 Up+resize shrink up 20 px
-	bindsym Mod1 Right+resize shrink right 20 px
+	bindsym Mod1+Left resize shrink left 20 px
+	bindsym Mod1+Down resize shrink down 20 px
+	bindsym Mod1+Up resize shrink up 20 px
+	bindsym Mod1+Right resize shrink right 20 px
 
 	bindsym Return mode "default"
 	bindsym Escape mode "default"
@@ -128,7 +126,9 @@ bindsym $mod+r mode $resize
 # Appearance variables.
 set $font-size 12
 set $line-height 18
-set $font-family IBM Plex Mono
+set $font-family SF Pro Display 
+
+set $highlight #0366d6
 
 set_from_resource $background background #000000
 set_from_resource $foreground foreground #ffffff
@@ -159,12 +159,12 @@ default_border normal 0
 for_window [class=".*"] title_format <span font="$font-size"> %title</span>
 
 # Colors:               Bord.   Back.   Text    Indi.   Chil.
-client.focused          #0066ff #0066ff #ffffff #000000 #0066ff
-client.focused_inactive #222222 #222222 #ffffff #000000 #000000
-client.unfocused        #222222 #222222 #ffffff #000000 #000000
-client.urgent           #ff3300 #000000 #ffffff #000000 #000000
-client.placeholder      #000000 #000000 #000000 #000000 #000000
-client.background       #000000
+client.focused          $highlight $highlight $color15 $color15 color4
+client.focused_inactive $color0 $color0 $foreground $background $background
+client.unfocused        $color0 $color0 $foreground $background $background
+client.urgent           $color1 $background $foreground $background $background
+client.placeholder      $background $background $background $background $background
+client.background       $background
 
 # Configure i3bar.
 bar {
@@ -175,15 +175,22 @@ bar {
 
 	colors {
 		# Workspace btns.: Bord.   Back.   Text         
-		focused_workspace  #ffffff #ffffff #000000
-		inactive_workspace #222222 #222222 #ffffff
-		active_workspace   #222222 #222222 #ffffff
-		urgent_workspace   #222222 #222222 #ffffff
-		binding_mode       #222222 #222222 #ffffff
+		focused_workspace  $color15 $color15 $color8
+		inactive_workspace $color8 $color8 $foreground
+		active_workspace   $color8 $color8 $foreground
+		urgent_workspace   $color8 $color8 $foreground
+		binding_mode       $color8 $color8 $foreground
 
 		# Bar colors.
-		background         #222222
-		statusline         #ffffff
-		separator          #222222
+		background         $color8
+		separator          $color8
+		statusline         $foreground
 	}
 }
+
+# ...
+assign [window_role="browser"] workspace $workspace2
+for_window [window_role="browser"] border none
+
+exec --no-startup-id google-chrome-stable
+exec --no-startup-id i3-sensible-terminal
