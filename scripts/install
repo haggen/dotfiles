@@ -13,7 +13,7 @@ os_partition=/dev/sda2
 efi_partition=/dev/sda1
 net_interface=enp0s3
 username=arthur
-rooted=
+chrooted=
 
 while test $# -gt 0; do
 	case "$1" in 
@@ -45,18 +45,14 @@ while test $# -gt 0; do
 			timezone="$2"
 			shift
 			;;
-		-r|--rooted)
-			rooted="rooted"
+		-r|--chrooted)
+			chrooted="chrooted"
 			;;
 	esac
 	shift
 done
 
-echo $keyboard_layout $rooted
-
-exit
-
-if test -n "$rooted"; then
+if test -n "$chrooted"; then
 	# Update everything.
 	pacman -Syyu
 
@@ -103,20 +99,14 @@ if test -n "$rooted"; then
 	passwd $username
 
 	# Setup sudo and confirm.
-	pacman -S sudo
+	pacman -S sudoe
 	EDITOR=nano visudo
 
-	# Setup AUR.
-	pacman -S git
-	git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
-	cd /tmp/yay-bin
-	makepkg -sri
-
 	# Setup X and i3.
-	#pacman -S xorg xorg-xinit xrvt-unicode uxrvt-perls i3 i3blocks i3lock
-	#cat <<-EOF >> /etc/profile
-	#	test "$(tty)" = "/dev/tty1" && startx
-	#EOF
+	pacman -S xorg xorg-xinit xrvt-unicode uxrvt-perls i3
+	cat <<-EOF >> /etc/profile
+		test "$(tty)" = "/dev/tty1" && startx
+	EOF
 
 	# Done.
 	exit

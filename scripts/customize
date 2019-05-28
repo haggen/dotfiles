@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Install additional software.
+pacman -S zsh p7zip rsync
+git clone --recursive https://github.com/sorin-ionescu/prezto.git ~/.zprezto
+cat <<-EOF > zsh
+	setopt EXTENDED_GLOB
+	for rcfile in $HOME/.zprezto/runcoms/^README.md(.N); do
+		ln -s "$rcfile" "$HOME/.${rcfile:t}"
+	done
+EOF
+git clone --recurse-submodules https://github.com/belak/prezto-contrib ~/.zprezto/contrib
+sed -i "s/sorin/spaceship/" ~/.zpreztorc
+chsh -s $(which zsh)
+
+# Fix keyboard layout.
+setxkbmap br
+sudo localectl set-x11-keymap br
+
+# Setup AUR.
+pacman -S git
+git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+cd /tmp/yay-bin
+makepkg -sri
+
+# Download font.
+yay -Sy otf-san-francisco otf-sfmono
+
+# Apply config files.
+for f in .config/**/*; do
+	if test -f $HOME/$f; then
+		cp $HOME/$f $HOME/$f-$(date +"%Y%m%d")
+	fi
+	if ! test -d $(dirname $HOME/$f); then
+		mkdir -p $(dirname $HOME/$f)
+	fi
+	ln -s $f $HOME/$f
+done
