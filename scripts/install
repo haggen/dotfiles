@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Minimal installation steps for Archlinux.
 # Few prompts. Lots of assumptions. Only tested on virtual machines.
 #
 
-set -ue
+set -ueo pipefail
 
 keyboard_layout=br-abnt2
 timezone=Brazil/East
@@ -52,16 +52,19 @@ while test $# -gt 0; do
 	shift
 done
 
-printf " The script will use the following configuration:
-	- Keyboard layout:   $keyboard_layout
-	- Timezone:          $timezone
-	- Disk:              $disk
-	- OS partition:      $os_partition
-	- EFI partition:     $efi_partition
-	- Network interface: $net_interface
-	- Username:          $username
+printf "
 
-	Press ENTER to continue or CTRL-C to abort.
+The script will use the following configuration:
+
+ - Keyboard layout:   [-k] $keyboard_layout 
+ - Timezone:          [-t] $timezone
+ - Disk:              [-d] $disk
+ - OS partition:      [-p] $os_partition
+ - EFI partition:     [-e] $efi_partition
+ - Network interface: [-n] $net_interface
+ - Username:          [-u] $username
+
+Press ENTER to continue or CTRL-C to abort...
 "
 read -rs _
 
