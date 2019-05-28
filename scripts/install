@@ -52,6 +52,19 @@ while test $# -gt 0; do
 	shift
 done
 
+printf " The script will use the following configuration:
+	- Keyboard layout:   $keyboard_layout
+	- Timezone:          $timezone
+	- Disk:              $disk
+	- OS partition:      $os_partition
+	- EFI partition:     $efi_partition
+	- Network interface: $net_interface
+	- Username:          $username
+
+	Press ENTER to continue or CTRL-C to abort.
+"
+read -rs _
+
 if test -n "$chrooted"; then
 	# Update everything.
 	pacman -Syyu

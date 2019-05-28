@@ -2,15 +2,15 @@
 
 # Install additional software.
 pacman -S zsh p7zip rsync
-git clone --recursive https://github.com/sorin-ionescu/prezto.git ~/.zprezto
-cat <<-EOF > zsh
+git clone --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto
+cat <<-EOF | zsh
 	setopt EXTENDED_GLOB
 	for rcfile in $HOME/.zprezto/runcoms/^README.md(.N); do
 		ln -s "$rcfile" "$HOME/.${rcfile:t}"
 	done
 EOF
-git clone --recurse-submodules https://github.com/belak/prezto-contrib ~/.zprezto/contrib
-sed -i "s/sorin/spaceship/" ~/.zpreztorc
+git clone --recurse-submodules https://github.com/belak/prezto-contrib $HOME/.zprezto/contrib
+sed -i "s/sorin/spaceship/" $HOME/.zpreztorc
 chsh -s $(which zsh)
 
 # Fix keyboard layout.
@@ -25,6 +25,10 @@ makepkg -sri
 
 # Download font.
 yay -Sy otf-san-francisco otf-sfmono
+
+# Config vim.
+git clone --depth=1 https://github.com/amix/vimrc.git $HOME/.vim_runtime
+sh $HOME/.vim_runtime/install_basic_vimrc.sh
 
 # Apply config files.
 for f in .config/**/*; do
