@@ -6,8 +6,33 @@ set -euo pipefail
 setxkbmap br
 sudo localectl set-x11-keymap br
 
+# Fix mouse accel.
+cat <<-EOF > /etc/X11/xorg.conf.d/10-mouse.conf
+	Section "InputClass"
+	    Identifier "Mouse"
+	    MatchDriver "libinput"
+	    MatchProduct "MOUSE"
+	    Option "Accel Speed" "-0.5"
+	EndSection
+EOF
+
 # Install additional software.
-pacman -S git nvidia zsh p7zip compton
+pacman -S git nvidia zsh p7zip compton rofi
+
+# Setup AUR.
+git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+cd /tmp/yay-bin
+makepkg -sri
+yay -Syy
+
+# Install even more stuff.
+yay -S polybar
+
+# Install fonts.
+yay -S ttf-symbola ttf-emojione
+sudo pacman -S ttf-dejavu ttf-liberation
+
+# Setup shell.
 git clone --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto
 cat <<-EOF | zsh
 	setopt EXTENDED_GLOB
@@ -20,19 +45,13 @@ sed -i "s/theme 'sorin'/theme 'spaceship'/" $HOME/.zpreztorc
 sed -i "s/'prompt'/'history-substring-search' \\\n  'syntax-highlighting' \\\n  'contrib-prompt' \\\n  'prompt'/" $HOME/.zpreztorc
 chsh -s $(which zsh)
 
-# Setup AUR.
-git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
-cd /tmp/yay-bin
-makepkg -sri
-
-# Install fonts.
-yay -Sy otf-san-francisco otf-sfmono ttf-dejavu ttf-symbola ttf-emojione
-
 # Config vim.
 git clone --depth=1 https://github.com/amix/vimrc.git $HOME/.vim_runtime
 sh $HOME/.vim_runtime/install_basic_vimrc.sh
 
 # Apply config files.
+prefix=$(realpath $(dirname $0)/..)
+cd $prefix
 for f in .config/**/*; do
 	if test -f $HOME/$f; then
 		cp $HOME/$f $HOME/$f-$(date +"%Y%m%d")
@@ -42,3 +61,5 @@ for f in .config/**/*; do
 	fi
     ln -s $(realpath $f) $HOME/$f
 done
+ln -s $(realpath .Xdefaults) $HOME/.Xdefaults
+ln -s $(realpath .xinitrc) $HOME/.xinitrc

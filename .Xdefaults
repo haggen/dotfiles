@@ -1,4 +1,4 @@
-*font: xft:SF Mono:size=12
+*font: xft:monospace:size=12
 *foreground: #D5D8DA
 *background: #1C1E26
 *cursorColor: #D5D8DA
@@ -19,13 +19,12 @@
 *color14: #6BE4E6
 *color15: #E5E8EA
 
-Xft.antialias: true
-Xft.rgba: rgb
-Xft.autohint: true
-Xft.hinting: true
-Xft.hintstyle: slight
-Xft.dpi: 96
+Xft.autohint: 0
 Xft.lcdfilter: lcddefault
+Xft.hintstyle: hintslight
+Xft.hinting: 1
+Xft.antialias: 1
+Xft.rgba: rgb
 
 URxvt.depth: 24
 URxvt.borderless: 1

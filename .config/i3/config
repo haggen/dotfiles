@@ -52,22 +52,24 @@ bindsym $mod+e layout toggle split
 bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
+#bindsym $mod+space focus mode_toggle
 
 # focus the parent container
 bindsym $mod+a focus parent
 
+bindsym $mod+space exec --no-startup-id rofi -show combi
+
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $workspace1 <span font="SF Mono 12">    1    </span>
-set $workspace2 <span font="SF Mono 12">    2    </span>
-set $workspace3 <span font="SF Mono 12">    3    </span>
-set $workspace4 <span font="SF Mono 12">    4    </span>
-set $workspace5 <span font="SF Mono 12">    5    </span>
-set $workspace6 <span font="SF Mono 12">    6    </span>
-set $workspace7 <span font="SF Mono 12">    7    </span>
-set $workspace8 <span font="SF Mono 12">    8    </span>
-set $workspace9 <span font="SF Mono 12">    9    </span>
+set $workspace1 "1"
+set $workspace2 "2"
+set $workspace3 "3"
+set $workspace4 "4"
+set $workspace5 "5"
+set $workspace6 "6"
+set $workspace7 "7"
+set $workspace8 "8"
+set $workspace9 "9"
 
 set $workspace10 "10"
 
@@ -105,7 +107,7 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # Resize mode.
-set $resize "Resizing..."
+set $resize "Resize: [Mod1+]Up/Down/Left/Right"
 mode $resize {
 	bindsym Left resize grow left 20 px
 	bindsym Down resize grow down 20 px
@@ -119,14 +121,28 @@ mode $resize {
 
 	bindsym Return mode "default"
 	bindsym Escape mode "default"
-	bindsym $mod+r mode "default"
+	bindsym Space mode "default"
 }
 bindsym $mod+r mode $resize
+
+# Power mode.
+set $power "Power: (P)ower off/(R)eboot/(S)uspend/(E)xit"
+mode $power {
+    bindsym p exec systemctl poweroff
+    bindsym r exec systemctl reboot
+    bindsym s exec systemctl suspend
+    bindsym e exit
+
+	bindsym Return mode "default"
+	bindsym Escape mode "default"
+	bindsym Space mode "default"
+}
+bindsym $mod+Shift+p mode $power
 
 # Appearance variables.
 set $font-size 12
 set $line-height 18
-set $font-family SF Pro Display 
+set $font-family sans-serif
 
 set $highlight #0366d6
 
@@ -166,28 +182,6 @@ client.urgent           $color1 $background $foreground $background $background
 client.placeholder      $background $background $background $background $background
 client.background       $background
 
-# Configure i3bar.
-bar {
-	# See ~/.config/i3blocks/config
-	status_command i3blocks 
-	font xft:$font-family $font-size
-	height 36
-
-	colors {
-		# Workspace btns.: Bord.   Back.   Text         
-		focused_workspace  $color15 $color15 $color8
-		inactive_workspace $color8 $color8 $foreground
-		active_workspace   $color8 $color8 $foreground
-		urgent_workspace   $color8 $color8 $foreground
-		binding_mode       $color8 $color8 $foreground
-
-		# Bar colors.
-		background         $color8
-		separator          $color8
-		statusline         $foreground
-	}
-}
-
 # ...
 #assign [window_role="browser"] workspace $workspace2
 for_window [window_role="browser"] border none
@@ -195,3 +189,5 @@ for_window [window_role="browser"] border none
 exec --no-startup-id i3-sensible-terminal
 exec --no-startup-id google-chrome-stable
 exec --no-startup-id compton -b
+exec --no-startup-id hsetroot -add "$color0" -add "$color8" -gradient 35
+exec_always --no-startup-id killall -q polybar; polybar default
