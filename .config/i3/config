@@ -189,8 +189,9 @@ bar {
 }
 
 # ...
-assign [window_role="browser"] workspace $workspace2
+#assign [window_role="browser"] workspace $workspace2
 for_window [window_role="browser"] border none
 
-exec --no-startup-id google-chrome-stable
 exec --no-startup-id i3-sensible-terminal
+exec --no-startup-id google-chrome-stable
+exec --no-startup-id compton -b

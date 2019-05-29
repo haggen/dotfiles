@@ -19,13 +19,13 @@
 *color14: #6BE4E6
 *color15: #E5E8EA
 
-!Xft.antialias: true
-!Xft.rgba: rgb
-!Xft.autohint: false
-!Xft.hinting: true
-!Xft.hintstyle: none
-!Xft.dpi: 96
-!Xft.lcdfilter: lcddefault
+Xft.antialias: true
+Xft.rgba: rgb
+Xft.autohint: true
+Xft.hinting: true
+Xft.hintstyle: slight
+Xft.dpi: 96
+Xft.lcdfilter: lcddefault
 
 URxvt.depth: 24
 URxvt.borderless: 1

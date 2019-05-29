@@ -1,30 +1,32 @@
 #!/usr/bin/env bash
 
-# Install additional software.
-pacman -S zsh p7zip rsync
-git clone --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto
-cat <<-EOF | zsh
-	setopt EXTENDED_GLOB
-	for rcfile in $HOME/.zprezto/runcoms/^README.md(.N); do
-		ln -s "$rcfile" "$HOME/.${rcfile:t}"
-	done
-EOF
-git clone --recurse-submodules https://github.com/belak/prezto-contrib $HOME/.zprezto/contrib
-sed -i "s/sorin/spaceship/" $HOME/.zpreztorc
-chsh -s $(which zsh)
+set -euo pipefail
 
 # Fix keyboard layout.
 setxkbmap br
 sudo localectl set-x11-keymap br
 
+# Install additional software.
+pacman -S git nvidia zsh p7zip compton
+git clone --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto
+cat <<-EOF | zsh
+	setopt EXTENDED_GLOB
+	for rcfile in \$HOME/.zprezto/runcoms/^README.md(.N); do
+		ln -s "\$rcfile" "\$HOME/.\${rcfile:t}"
+	done
+EOF
+git clone --recurse-submodules https://github.com/belak/prezto-contrib $HOME/.zprezto/contrib
+sed -i "s/theme 'sorin'/theme 'spaceship'/" $HOME/.zpreztorc
+sed -i "s/'prompt'/'history-substring-search' \\\n  'syntax-highlighting' \\\n  'contrib-prompt' \\\n  'prompt'/" $HOME/.zpreztorc
+chsh -s $(which zsh)
+
 # Setup AUR.
-pacman -S git
 git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
 cd /tmp/yay-bin
 makepkg -sri
 
-# Download font.
-yay -Sy otf-san-francisco otf-sfmono
+# Install fonts.
+yay -Sy otf-san-francisco otf-sfmono ttf-dejavu ttf-symbola ttf-emojione
 
 # Config vim.
 git clone --depth=1 https://github.com/amix/vimrc.git $HOME/.vim_runtime
@@ -38,5 +40,5 @@ for f in .config/**/*; do
 	if ! test -d $(dirname $HOME/$f); then
 		mkdir -p $(dirname $HOME/$f)
 	fi
-	ln -s $f $HOME/$f
+    ln -s $(realpath $f) $HOME/$f
 done
