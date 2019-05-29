@@ -17,56 +17,40 @@ chrooted=
 
 while test $# -gt 0; do
 	case "$1" in 
-		-k|--keyboard-layout)
+		-k)
 			keyboard_layout="$2"
 			shift
 			;;
-		-d|--disk)
+		-d)
 			disk="$2"
 			shift
 			;;
-		-p|--os-partition)
+		-p)
 			os_partition="$2"
 			shift
 			;;
-		-e|--efi-partition)
+		-e)
 			efi_partition="$2"
 			shift
 			;;
-		-n|--net-interface)
+		-n)
 			net_interface="$2"
 			shift
 			;;
-		-u|--username)
+		-u)
 			username="$2"
 			shift
 			;;
-		-t|--timezone)
+		-t)
 			timezone="$2"
 			shift
 			;;
-		-r|--chrooted)
+		-r)
 			chrooted="chrooted"
 			;;
 	esac
 	shift
 done
-
-printf "
-
-The script will use the following configuration:
-
- - Keyboard layout:   [-k] $keyboard_layout 
- - Timezone:          [-t] $timezone
- - Disk:              [-d] $disk
- - OS partition:      [-p] $os_partition
- - EFI partition:     [-e] $efi_partition
- - Network interface: [-n] $net_interface
- - Username:          [-u] $username
-
-Press ENTER to continue or CTRL-C to abort...
-"
-read -rs _
 
 if test -n "$chrooted"; then
 	# Update everything.
@@ -77,14 +61,16 @@ if test -n "$chrooted"; then
 
 	# Setup GRUB.
 	pacman -S grub 
-	if test -d /sys/firmware/efi; then
-		mkfs.fat -F32 $efi_partition
+	if test -n "$efi_partition"; then
 		pacman -S efibootmgr
-		mkdir /boot/EFI
-		mount $efi_partition /boot/EFI
-		grub-install --target=x86_64-efi --bootloader-id=GRUB --recheck
-	else
-		grub-install --target=i386-pc $disk
+		mkfs.fat -F32 $efi_partition
+		mkdir /boot/efi
+		mount $efi_partition /boot/efi
+		if test -d /sys/firmware/efi; then
+			grub-install --target=x86_64-efi
+		else
+			grub-install --target=i386-pc $disk
+		fi
 	fi
 	grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -107,7 +93,7 @@ if test -n "$chrooted"; then
 
 	# Persist keyboard layout.
 	cat <<-EOF > /etc/vconsole.conf
-		KEYMAP=$layout
+		KEYMAP=$keyboard_layout
 	EOF
 
 	# Setup accounts.
@@ -115,17 +101,32 @@ if test -n "$chrooted"; then
 	passwd $username
 
 	# Setup sudo and confirm.
-	pacman -S sudoe
+	pacman -S sudo
 	EDITOR=nano visudo
 
 	# Setup X and i3.
-	pacman -S xorg xorg-xinit xrvt-unicode uxrvt-perls i3
+	pacman -S xorg xorg-xinit rxvt-unicode urxvt-perls i3
 	cat <<-EOF >> /etc/profile
 		test "$(tty)" = "/dev/tty1" && startx
 	EOF
 
 	# Done.
 	exit
+else 
+	cat <<-EOF
+	The script will use the following configuration:
+
+	- Keyboard layout:   [-k] $keyboard_layout 
+	- Timezone:          [-t] $timezone
+	- Disk:              [-d] $disk
+	- OS partition:      [-p] $os_partition
+	- EFI partition:     [-e] $efi_partition
+	- Network interface: [-n] $net_interface
+	- Username:          [-u] $username
+
+	Press ENTER to continue or CTRL-C to abort...
+	EOF
+	read -rs _
 fi
 
 # Set keyboard layout.
@@ -171,7 +172,7 @@ nano /mnt/etc/fstab
 
 # Change root.
 cp $0 /mnt/root/
-arch-chroot /mnt /root/$(basename $0) --chrooted
+arch-chroot /mnt /root/$(basename $0) -r
 
 # Done
 umount -a
