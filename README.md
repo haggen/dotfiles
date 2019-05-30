@@ -19,3 +19,5 @@
 - https://wiki.archlinux.org/index.php
 - https://www.reddit.com/r/unixporn
 - https://tutos.readthedocs.io/en/latest/source/Arch.html
+- https://www.freedesktop.org/software/fontconfig/fontconfig-user.html
+- https://github.com/yshui/compton
