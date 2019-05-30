@@ -17,7 +17,7 @@ cat <<-EOF > /etc/X11/xorg.conf.d/10-mouse.conf
 EOF
 
 # Install additional software.
-pacman -S git nvidia zsh p7zip compton rofi
+pacman -S git nvidia zsh p7zip compton rofi hsetroot atom
 
 # Setup AUR.
 git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
@@ -26,7 +26,7 @@ makepkg -sri
 yay -Syy
 
 # Install even more stuff.
-yay -S polybar
+yay -S polybar rofi-calc
 
 # Install fonts.
 yay -S ttf-symbola ttf-emojione
