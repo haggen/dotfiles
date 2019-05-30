@@ -1,3 +1,3 @@
-rofi.combi-modi: window,drun,ssh
+rofi.combi-modi: window,drun
+rofi.modi: combi,calc,keys
 rofi.font: sans-serif 12
-rofi.modi: combi
