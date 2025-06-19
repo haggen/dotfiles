@@ -1,12 +1,21 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 now=$(date +%s)
 git clone https://github.com/haggen/dotfiles.git "$HOME/.dotfiles"
 
-find "$HOME/.dotfiles" -type f; while read -r file; do
-    target="$HOME/${file#"$HOME/.dotfiles/"}"
+sources=(
+    "$HOME/.dotfiles/.config/fish/config.fish"
+    "$HOME/.dotfiles/.config/starship.toml"
+)
+
+for source in "${sources[@]}"; do
+    target="$HOME/${source#"$HOME/.dotfiles/"}"
+
     if test -f "$target"; then
-        cp -p "$target" "$target.$now"
+        mv "$target" "$target.$now"
+    elif ! test -d "$(dirname "$target")"; then
+        mkdir -p "$(dirname "$target")"
     fi
-    ln -s "$file" "$target"
+
+    ln -s "$source" "$target"
 done
