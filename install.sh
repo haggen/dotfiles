@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -ue
+
 now=$(date +%s)
 git clone https://github.com/haggen/dotfiles.git "$HOME/.dotfiles"
 
@@ -9,7 +11,7 @@ sources=(
 )
 
 for source in "${sources[@]}"; do
-    target="$HOME/${source#"$HOME/.dotfiles/"}"
+    target="$HOME/${source#*/.dotfiles/}"
 
     if test -f "$target"; then
         mv "$target" "$target.$now"
