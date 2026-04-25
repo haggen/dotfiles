@@ -6,9 +6,9 @@ if test -d ~/.dotfiles; then
     git -C ~/.dotfiles pull --rebase
 else
     git clone --depth=1 https://github.com/haggen/dotfiles.git ~/.dotfiles
-    install -b -l rs ~/.dotfiles/.config/fish/config.fish ~/.config/fish/config.fish
-    install -b -l rs ~/.dotfiles/.config/starship.toml ~/.config/starship.toml
-    install -b -l rs ~/.dotfiles/.vimrc ~/.vimrc
+    ln -s ~/.dotfiles/.config/fish/config.fish ~/.config/fish/config.fish
+    ln -s ~/.dotfiles/.config/starship.toml ~/.config/starship.toml
+    ln -s ~/.dotfiles/.vimrc ~/.vimrc
 fi
 
 # vim-sleuth is an indentation detection plugin.
@@ -23,6 +23,6 @@ if test -d ~/.tmux; then
     git -C ~/.tmux pull --rebase
 else
     git clone --depth=1 https://github.com/gpakosz/.tmux.git ~/.tmux
-    install -b -l rs ~/.tmux/.tmux.conf ~/.tmux.conf
-    install -b ~/.tmux/.tmux.conf.local ~/.tmux.conf.local
+    ln -s ~/.tmux/.tmux.conf ~/.tmux.conf
+    cp -n ~/.tmux/.tmux.conf.local ~/.tmux.conf.local
 fi
