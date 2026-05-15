@@ -99,6 +99,9 @@ endif
 set ttimeout
 set ttimeoutlen=100
 
+" Allow changing buffer without saving.
+set hidden
+
 " Keyboard shortcuts.
 let mapleader = ' '
 
@@ -109,10 +112,20 @@ noremap <C-k> <C-w>k
 noremap <C-l> <C-w>l
 
 " Reload vimrc.
-noremap <silent> <leader>V :source ~/.vimrc<CR>:filetype detect<CR>:exe ":echo 'vimrc reloaded'"<CR>
+noremap <silent> <leader>V :source ~/.vimrc<cr>:filetype detect<cr>:exe ":echo 'vimrc reloaded'"<cr>
 
-" In case you forgot to sudo.
-cnoremap w!! %!sudo tee > /dev/null %
+" In case you forgot to sudo, type :W.
+command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
+
+" Shortcuts.
+nnoremap <leader><tab> :bnext<cr>
+nnoremap <leader>w :w<cr>
+nnoremap <leader>W :W<cr>
+nnoremap <leader>x :x<cr>
+nnoremap <leader>Q :q!<cr>
+
+" Disable highlight when <leader><cr> is pressed.
+map <silent> <leader><cr> :noh<cr>
 
 " Strip trailing whitespace on write.
 autocmd BufWritePre * let v = winsaveview() | keeppatterns %s/\s\+$//e | call winrestview(v)
