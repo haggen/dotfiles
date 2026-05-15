@@ -24,5 +24,5 @@ if test -d ~/.tmux; then
 else
     git clone --depth=1 https://github.com/gpakosz/.tmux.git ~/.tmux
     ln -s ~/.tmux/.tmux.conf ~/.tmux.conf
-    cp -n ~/.tmux/.tmux.conf.local ~/.tmux.conf.local
+    cp ~/.tmux/.tmux.conf.local ~/.tmux.conf.local
 fi
