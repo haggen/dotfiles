@@ -50,9 +50,6 @@ set list
 " Characters used to display tabs and trailing spaces.
 set listchars=tab:▸\ ,trail:▫
 
-" Show line numbers.
-set number
-
 " Show cursor position in the statusline.
 set ruler
 
